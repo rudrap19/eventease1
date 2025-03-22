@@ -1,0 +1,1 @@
+flutterfire configure --project=eventease-38aca
