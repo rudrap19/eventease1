@@ -4,6 +4,7 @@ import 'firebase_options.dart';
 import 'login_choice_file.dart';
 import 'home_page.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure binding is initialized.
   await Firebase.initializeApp(
