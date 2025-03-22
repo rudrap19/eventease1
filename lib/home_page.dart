@@ -2,12 +2,108 @@ import 'package:flutter/material.dart';
 import 'venue_page.dart';
 import 'manager_page.dart';
 import 'product_page.dart';
-import 'services_page.dart';
-import 'compare_page.dart'; // Import Compare page
+import 'services_page.dart'; // New import for Services page
+import 'compare_page.dart';  // New import for Compare page
 
-/// HomeContentPage displays the search bar, categories, trending venues, and featured products.
+/// A reusable scaffold that manages bottom navigation and page switching.
+class CustomBottomNavScaffold extends StatefulWidget {
+  final List<Widget> pages;
+  final List<BottomNavigationBarItem> items;
+  final int initialIndex;
+
+  const CustomBottomNavScaffold({
+    Key? key,
+    required this.pages,
+    required this.items,
+    this.initialIndex = 0,
+  })  : assert(
+  pages.length == items.length,
+  "The number of pages must match the number of navigation items.",
+  ),
+        super(key: key);
+
+  @override
+  CustomBottomNavScaffoldState createState() =>
+      CustomBottomNavScaffoldState();
+}
+
+class CustomBottomNavScaffoldState extends State<CustomBottomNavScaffold> {
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: widget.pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+        items: widget.items,
+      ),
+    );
+  }
+}
+
+/// Main HomePage using the custom bottom navigation scaffold.
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomBottomNavScaffold(
+      pages: const [
+        HomeContentPage(),
+        VenuePage(),
+        ManagersPage(),
+        EventProductStorePage(),// Changed from inline ProductsPage to imported EventProductStorePage
+        ServicesPage(),          // Now imported from services_page.dart
+        ComparePage(),           // Now imported from compare_page.dart
+      ],
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.location_on),
+          label: 'Venue',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.supervisor_account),
+          label: 'Managers',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.shopping_bag),
+          label: 'Products',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.miscellaneous_services),
+          label: 'Services',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.compare_arrows),
+          label: 'Compare',
+        ),
+      ],
+    );
+  }
+}
+
+/// HomeContentPage displays the search bar, categories, trending venues, and featured products.
+class HomeContentPage extends StatelessWidget {
+  const HomeContentPage({Key? key}) : super(key: key);
 
   Widget _buildSearchBar() {
     return Padding(
@@ -25,10 +121,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Function to create clickable category cards
-  Widget _buildClickableCategoryCard({
-    required BuildContext context,
-    required Widget page, // Page to navigate to
+  Widget _buildCategoryCard({
     required IconData icon,
     required Color color,
     required String text,
@@ -59,23 +152,15 @@ class HomePage extends StatelessWidget {
       ),
     );
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => page),
-        );
-      },
-      child: isFullWidth
-          ? SizedBox(
-        height: 150,
-        width: double.infinity,
-        child: cardContent,
-      )
-          : AspectRatio(
-        aspectRatio: 1,
-        child: cardContent,
-      ),
+    return isFullWidth
+        ? SizedBox(
+      height: 150,
+      width: double.infinity,
+      child: cardContent,
+    )
+        : AspectRatio(
+      aspectRatio: 1,
+      child: cardContent,
     );
   }
 
@@ -84,7 +169,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Home Page'), // ✅ Changed from "Responsive Design" to "Home Page"
+        title: const Text('Responsive Design'),
         backgroundColor: Colors.blue,
       ),
       body: SafeArea(
@@ -94,15 +179,13 @@ class HomePage extends StatelessWidget {
             // Search Bar
             _buildSearchBar(),
 
-            // Categories Section with Clickable Cards
+            // Categories Section
             Column(
               children: [
                 Row(
                   children: [
                     Expanded(
-                      child: _buildClickableCategoryCard(
-                        context: context,
-                        page: const ManagersPage(), // Redirect to Managers Page
+                      child: _buildCategoryCard(
                         icon: Icons.calendar_today,
                         color: Colors.blue.shade100,
                         text: 'Event Management',
@@ -111,9 +194,7 @@ class HomePage extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _buildClickableCategoryCard(
-                        context: context,
-                        page: const ServicesPage(), // Redirect to Services Page
+                      child: _buildCategoryCard(
                         icon: Icons.person,
                         color: Colors.purple.shade100,
                         text: 'Individual Service',
@@ -126,9 +207,7 @@ class HomePage extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: _buildClickableCategoryCard(
-                        context: context,
-                        page: const VenuePage(), // Redirect to Venue Page
+                      child: _buildCategoryCard(
                         icon: Icons.location_on,
                         color: Colors.green.shade100,
                         text: 'Venue',
@@ -137,9 +216,7 @@ class HomePage extends StatelessWidget {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _buildClickableCategoryCard(
-                        context: context,
-                        page: const EventProductStorePage(), // Redirect to Products Page
+                      child: _buildCategoryCard(
                         icon: Icons.shopping_cart,
                         color: Colors.yellow.shade100,
                         text: 'Product',
@@ -149,9 +226,7 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _buildClickableCategoryCard(
-                  context: context,
-                  page: const ComparePage(), // Redirect to Compare Page
+                _buildCategoryCard(
                   icon: Icons.star,
                   color: Colors.pink.shade100,
                   text: 'Compare',
@@ -159,6 +234,228 @@ class HomePage extends StatelessWidget {
                   isFullWidth: true,
                 ),
               ],
+            ),
+            const SizedBox(height: 24),
+
+            // Trending Venues Section
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Trending Venues',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 2,
+              childAspectRatio: 1,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              children: const [
+                VenueCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Central Park',
+                  subtitle: '',
+                ),
+                VenueCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Downtown Arena',
+                  subtitle: '',
+                ),
+                VenueCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'City Square',
+                  subtitle: '',
+                ),
+                VenueCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Beachside',
+                  subtitle: '',
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Featured Products Section
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Featured Products',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 2,
+              childAspectRatio: 1,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              children: const [
+                ProductCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Product 1',
+                ),
+                ProductCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Product 2',
+                ),
+                ProductCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Product 3',
+                ),
+                ProductCard(
+                  imageUrl: 'https://placehold.co/300x300',
+                  title: 'Product 4',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A card widget representing a trending venue.
+class VenueCard extends StatelessWidget {
+  final String imageUrl;
+  final String title;
+  final String subtitle;
+
+  const VenueCard({
+    Key? key,
+    required this.imageUrl,
+    required this.title,
+    required this.subtitle,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Only show subtitle if it's not empty.
+    List<Widget> infoWidgets = [
+      Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+        textAlign: TextAlign.center,
+      ),
+    ];
+
+    if (subtitle.isNotEmpty) {
+      infoWidgets.add(const SizedBox(height: 4));
+      infoWidgets.add(
+        Text(
+          subtitle,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Image.network(
+                imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: infoWidgets,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A card widget representing a featured product.
+class ProductCard extends StatelessWidget {
+  final String imageUrl;
+  final String title;
+
+  const ProductCard({
+    Key? key,
+    required this.imageUrl,
+    required this.title,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Image.network(
+                imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
