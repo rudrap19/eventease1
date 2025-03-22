@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'venue_page.dart';      // Ensure this file exists
-import 'manager_page.dart';    // Ensure this file exists
+import 'venue_page.dart';
+import 'manager_page.dart';
 import 'product_page.dart';
+import 'services_page.dart'; // New import for Services page
+import 'compare_page.dart';  // New import for Compare page
+
 /// A reusable scaffold that manages bottom navigation and page switching.
 class CustomBottomNavScaffold extends StatefulWidget {
   final List<Widget> pages;
@@ -20,7 +23,8 @@ class CustomBottomNavScaffold extends StatefulWidget {
         super(key: key);
 
   @override
-  CustomBottomNavScaffoldState createState() => CustomBottomNavScaffoldState();
+  CustomBottomNavScaffoldState createState() =>
+      CustomBottomNavScaffoldState();
 }
 
 class CustomBottomNavScaffoldState extends State<CustomBottomNavScaffold> {
@@ -61,11 +65,11 @@ class HomePage extends StatelessWidget {
     return CustomBottomNavScaffold(
       pages: const [
         HomeContentPage(),
-        VenuePage(),       // Points to venue_page.dart
-        ManagersPage(),    // Points to manager_page.dart
-        ProductsPage(),
-        ServicesPage(),
-        ComparePage(),     // New Compare page
+        VenuePage(),
+        ManagersPage(),
+        EventProductStorePage(),// Changed from inline ProductsPage to imported EventProductStorePage
+        ServicesPage(),          // Now imported from services_page.dart
+        ComparePage(),           // Now imported from compare_page.dart
       ],
       items: const [
         BottomNavigationBarItem(
@@ -98,7 +102,6 @@ class HomePage extends StatelessWidget {
 }
 
 /// HomeContentPage displays the search bar, categories, trending venues, and featured products.
-/// Here we use a ListView for scrolling, which adapts the content height dynamically.
 class HomeContentPage extends StatelessWidget {
   const HomeContentPage({Key? key}) : super(key: key);
 
@@ -175,6 +178,7 @@ class HomeContentPage extends StatelessWidget {
           children: [
             // Search Bar
             _buildSearchBar(),
+
             // Categories Section
             Column(
               children: [
@@ -232,7 +236,8 @@ class HomeContentPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            // Trending Venues Section (location details removed)
+
+            // Trending Venues Section
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -275,7 +280,8 @@ class HomeContentPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            // Featured Products Section (Pricing removed)
+
+            // Featured Products Section
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -343,16 +349,19 @@ class VenueCard extends StatelessWidget {
         textAlign: TextAlign.center,
       ),
     ];
+
     if (subtitle.isNotEmpty) {
       infoWidgets.add(const SizedBox(height: 4));
-      infoWidgets.add(Text(
-        subtitle,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Colors.grey,
+      infoWidgets.add(
+        Text(
+          subtitle,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.grey,
+          ),
+          textAlign: TextAlign.center,
         ),
-        textAlign: TextAlign.center,
-      ));
+      );
     }
 
     return Container(
@@ -398,7 +407,7 @@ class VenueCard extends StatelessWidget {
   }
 }
 
-/// A card widget representing a featured product (without pricing).
+/// A card widget representing a featured product.
 class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -450,53 +459,6 @@ class ProductCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Placeholder page for Products.
-class ProductsPage extends StatelessWidget {
-  const ProductsPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Products"),
-      ),
-      body: const Center(child: Text("Products Page Content")),
-    );
-  }
-}
-
-/// Placeholder page for Services.
-class ServicesPage extends StatelessWidget {
-  const ServicesPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Services"),
-      ),
-      body: const Center(child: Text("Services Page Content")),
-    );
-  }
-}
-
-/// ComparePage: displayed when the user taps the "Compare" tab.
-class ComparePage extends StatelessWidget {
-  const ComparePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Compare"),
-      ),
-      body: const Center(
-        child: Text("Compare Page Content"),
       ),
     );
   }

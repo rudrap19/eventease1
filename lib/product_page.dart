@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 /// The main products page for the event product store.
-class ProductsPage extends StatelessWidget {
+class EventProductStorePage extends StatelessWidget {
+  const EventProductStorePage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
