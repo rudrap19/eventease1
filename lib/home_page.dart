@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'venue_page.dart';
 import 'manager_page.dart';
-import 'product_page.dart';
-import 'services_page.dart'; // New import for Services page
+import 'productpages/product_page.dart';
+import 'servicepages/services_page.dart'; // New import for Services page
 import 'compare_page.dart';  // New import for Compare page
 
 /// A reusable scaffold that manages bottom navigation and page switching.
@@ -63,13 +63,13 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomBottomNavScaffold(
-      pages: const [
-        HomeContentPage(),
-        VenuePage(),
-        ManagersPage(),
-        EventProductStorePage(),// Changed from inline ProductsPage to imported EventProductStorePage
-        ServicesPage(),          // Now imported from services_page.dart
-        ComparePage(),           // Now imported from compare_page.dart
+      pages: [
+        const HomeContentPage(),
+        const VenuePage(),
+        const ManagersPage(),
+        const EventProductStorePage(),// Changed from inline ProductsPage to imported EventProductStorePage
+        const ServicesPage(),          // Now imported from services_page.dart
+        const ComparePage(),           // Now imported from compare_page.dart
       ],
       items: const [
         BottomNavigationBarItem(

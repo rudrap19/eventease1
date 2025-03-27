@@ -1,4 +1,4 @@
-import 'package:eventease1/ManagerPageroot.dart';
+import 'package:eventease1/managerroot/ManagerPageroot.dart';
 import 'package:flutter/material.dart';
 
 /// Authentication page for Event Managers using a custom Firestore flow.
