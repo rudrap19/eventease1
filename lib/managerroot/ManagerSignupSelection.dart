@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+
+import 'package:flutter/material.dart';
 import '../user_auth_page.dart';
 import '../manager_auth_page.dart';
-import 'venuesignupform.dart';
-
+import 'VenueSignUpFormApp.dart';
 class ManagerSignupSelection extends StatefulWidget {
   const ManagerSignupSelection({Key? key}) : super(key: key);
 
@@ -20,7 +21,7 @@ class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
       );
       return;
     }
-    // Navigate to the appropriate signup page based on the selected option.
+
     if (_selectedOption == "Manager") {
       Navigator.push(
         context,
@@ -32,7 +33,7 @@ class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserAuthPage(role: "Venue"),
+          builder: (context) => VenueSignUpFormApp(),
         ),
       );
     } else if (_selectedOption == "Services") {
@@ -55,60 +56,73 @@ class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Set the AppBar background to transparent.
       appBar: AppBar(
         title: const Text("Select Signup Option"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            RadioListTile<String>(
-              title: const Text("Venue"),
-              value: "Venue",
-              groupValue: _selectedOption,
-              onChanged: (value) {
-                setState(() {
-                  _selectedOption = value;
-                });
-              },
+      // Extend the body behind the AppBar.
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          // Background image container.
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/bg.png"),
+                fit: BoxFit.cover,
+              ),
             ),
-            RadioListTile<String>(
-              title: const Text("Manager"),
-              value: "Manager",
-              groupValue: _selectedOption,
-              onChanged: (value) {
-                setState(() {
-                  _selectedOption = value;
-                });
-              },
+          ),
+          // Overlay the content on top of the background.
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  RadioListTile<String>(
+                    title: const Text("Venue"),
+                    value: "Venue",
+                    groupValue: _selectedOption,
+                    onChanged: (value) {
+                      setState(() => _selectedOption = value);
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text("Manager"),
+                    value: "Manager",
+                    groupValue: _selectedOption,
+                    onChanged: (value) {
+                      setState(() => _selectedOption = value);
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text("Services"),
+                    value: "Services",
+                    groupValue: _selectedOption,
+                    onChanged: (value) {
+                      setState(() => _selectedOption = value);
+                    },
+                  ),
+                  RadioListTile<String>(
+                    title: const Text("Products"),
+                    value: "Products",
+                    groupValue: _selectedOption,
+                    onChanged: (value) {
+                      setState(() => _selectedOption = value);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _managerSignupSelection,
+                    child: const Text("Confirm"),
+                  ),
+                ],
+              ),
             ),
-            RadioListTile<String>(
-              title: const Text("Services"),
-              value: "Services",
-              groupValue: _selectedOption,
-              onChanged: (value) {
-                setState(() {
-                  _selectedOption = value;
-                });
-              },
-            ),
-            RadioListTile<String>(
-              title: const Text("Products"),
-              value: "Products",
-              groupValue: _selectedOption,
-              onChanged: (value) {
-                setState(() {
-                  _selectedOption = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _managerSignupSelection,
-              child: const Text("Confirm"),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

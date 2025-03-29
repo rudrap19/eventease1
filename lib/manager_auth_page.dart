@@ -48,7 +48,7 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
     } else {
       // Sign-up flow: check if provided details match our criteria.
       if (usernameController.text.trim() == "manager" &&
-          emailController.text.trim() == "manager@email.com" &&
+          emailController.text.trim() == "manager" &&
           passwordController.text.trim() == "12345") {
         Navigator.pushReplacement(
           context,

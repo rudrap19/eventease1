@@ -1,29 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ManagersPage extends StatelessWidget {
   const ManagersPage({Key? key}) : super(key: key);
 
-  // A static list of managers. You can update these details as needed.
-  final List<Map<String, String>> managers = const [
-    {
-      "name": "Alice",
-      "imageUrl": "https://placehold.co/300x300",
-    },
-    {
-      "name": "Bob",
-      "imageUrl": "https://placehold.co/300x300",
-    },
-    {
-      "name": "Charlie",
-      "imageUrl": "https://placehold.co/300x300",
-    },
-    {
-      "name": "Diana",
-      "imageUrl": "https://placehold.co/300x300",
-    },
-  ];
-
-  // Helper widget to build a static manager card.
+  // Helper method to build a manager card.
   Widget _buildManagerCard({
     required String imageUrl,
     required String name,
@@ -44,26 +25,19 @@ class ManagersPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
-            // Image section
             Expanded(
               flex: 2,
-              child: imageUrl.isNotEmpty
-                  ? Image.network(
+              child: Image.network(
                 imageUrl,
                 width: double.infinity,
                 fit: BoxFit.cover,
-              )
-                  : Container(
-                color: Colors.grey,
-                child: const Icon(Icons.person, size: 50),
               ),
             ),
-            // Manager name
             Expanded(
               flex: 1,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
                   child: Text(
                     name,
                     style: const TextStyle(
@@ -80,22 +54,35 @@ class ManagersPage extends StatelessWidget {
     );
   }
 
-  // Builds a grid view of static manager cards.
+  // Build the grid view dynamically from Firestore.
   Widget _buildManagersGrid() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: GridView.count(
-        crossAxisCount: 2,
-        childAspectRatio: 1,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        children: managers.map((manager) {
-          return _buildManagerCard(
-            imageUrl: manager["imageUrl"]!,
-            name: manager["name"]!,
-          );
-        }).toList(),
-      ),
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('managers').snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error: ${snapshot.error}"));
+        }
+        final managers = snapshot.data!.docs;
+        return GridView.count(
+          padding: const EdgeInsets.only(bottom: 12),
+          crossAxisCount: 2,
+          childAspectRatio: 0.85,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          children: managers.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final String name = data['name'] ?? 'Unnamed Manager';
+            final String imageUrl = data['imageUrl'] ?? 'https://placehold.co/300x300';
+            return _buildManagerCard(
+              imageUrl: imageUrl,
+              name: name,
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
@@ -107,7 +94,6 @@ class ManagersPage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -116,8 +102,12 @@ class ManagersPage extends StatelessWidget {
               ),
             ),
           ),
-          // The managers grid over the background
-          _buildManagersGrid(),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildManagersGrid(),
+            ),
+          ),
         ],
       ),
     );

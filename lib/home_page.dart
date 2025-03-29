@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'venue_page.dart';
+import 'venuepages/venue_page.dart';
 import 'manager_page.dart';
 import 'productpages/product_page.dart';
 import 'servicepages/services_page.dart';
 import 'compare_page.dart';
-import 'auth_service.dart'; // Added for signout functionality
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -309,30 +308,6 @@ class HomeContentPage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            // Logout Button at the bottom
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  AuthService().signout(context: context);
-                },
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.redAccent.withOpacity(0.8),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
           ],
         ),
       ),
