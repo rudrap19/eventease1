@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import 'venuedesc.dart'; // Make sure this file exists and exports a VenueDesc widget.
+import 'venuedesc.dart';
 
 class VenuePage extends StatelessWidget {
   const VenuePage({Key? key}) : super(key: key);
