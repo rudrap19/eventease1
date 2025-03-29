@@ -39,7 +39,7 @@ class _ComparePageState extends State<ComparePage> {
           .ref()
           .child('compare_uploads')
           .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-      final uploadTask = storageRef.putFile(_selectedImage!); 
+      final uploadTask = storageRef.putFile(_selectedImage!);   
       final snapshot = await uploadTask;
       final imageUrl = await snapshot.ref.getDownloadURL();
 

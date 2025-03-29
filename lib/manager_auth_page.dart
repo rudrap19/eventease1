@@ -1,4 +1,5 @@
 import 'package:eventease1/managerroot/ManagerPageroot.dart';
+import 'package:eventease1/managerroot/ManagerSignupSelection.dart';
 import 'package:flutter/material.dart';
 
 /// Authentication page for Event Managers using a custom Firestore flow.
@@ -28,6 +29,35 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
     passwordController.dispose();
     usernameController.dispose();
     super.dispose();
+  }
+
+  void _authenticate() {
+    if (isLogin) {
+      // Login flow: check against login credentials.
+      if (emailController.text.trim() == "manager@123.com" &&
+          passwordController.text.trim() == "pass123") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ManagerPageroot(),
+          ),
+        );
+      } else {
+        // Handle login failure (e.g., show an error message).
+      }
+    } else {
+      // Sign-up flow: check if provided details match our criteria.
+      if (usernameController.text.trim() == "manager" &&
+          emailController.text.trim() == "manager@email.com" &&
+          passwordController.text.trim() == "12345") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ManagerSignupSelection(),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -114,7 +144,7 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
                       ),
                       SizedBox(height: 20),
                     ],
-                    // Email field with controller.
+                    // Email field.
                     TextField(
                       controller: emailController,
                       decoration: InputDecoration(
@@ -127,7 +157,7 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    // Password field with controller.
+                    // Password field.
                     TextField(
                       controller: passwordController,
                       obscureText: true,
@@ -142,29 +172,15 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
                     ),
                     SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        if (emailController.text.trim() == "manager@123.com" &&
-                            passwordController.text.trim() == "pass123") {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ManagerPageroot(),
-                            ),
-                          );
-                        } else {
-                          // TODO: Add Firestore code here for Event Manager sign-up.
-                          // Store the sign-up request (e.g., in 'pending_event_manager_requests')
-                          // using usernameController.text, emailController.text, and passwordController.text.
-                        }
-                      },
+                      onPressed: _authenticate,
                       child: Text(
                         isLogin
                             ? 'Login as ${widget.role}'
                             : 'Sign Up as ${widget.role}',
                       ),
                       style: ElevatedButton.styleFrom(
-                        padding:
-                        EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),

@@ -2,41 +2,31 @@ import 'package:flutter/material.dart';
 import 'venue_page.dart';
 import 'manager_page.dart';
 import 'productpages/product_page.dart';
-import 'servicepages/services_page.dart'; // New import for Services page
-import 'compare_page.dart';  // New import for Compare page
+import 'servicepages/services_page.dart';
+import 'compare_page.dart';
+import 'auth_service.dart'; // Added for signout functionality
 
-/// A reusable scaffold that manages bottom navigation and page switching.
-class CustomBottomNavScaffold extends StatefulWidget {
-  final List<Widget> pages;
-  final List<BottomNavigationBarItem> items;
-  final int initialIndex;
-
-  const CustomBottomNavScaffold({
-    Key? key,
-    required this.pages,
-    required this.items,
-    this.initialIndex = 0,
-  })  : assert(
-  pages.length == items.length,
-  "The number of pages must match the number of navigation items.",
-  ),
-        super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
 
   @override
-  CustomBottomNavScaffoldState createState() =>
-      CustomBottomNavScaffoldState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class CustomBottomNavScaffoldState extends State<CustomBottomNavScaffold> {
-  late int _currentIndex;
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-  }
+  // List of pages for bottom navigation.
+  final List<Widget> _pages = const [
+    HomeContentPage(),
+    VenuePage(),
+    ManagersPage(),
+    EventProductStorePage(),
+    ServicesPage(),
+    ComparePage(),
+  ];
 
-  void _onItemTapped(int index) {
+  void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
     });
@@ -45,82 +35,79 @@ class CustomBottomNavScaffoldState extends State<CustomBottomNavScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.pages[_currentIndex],
+      // Use a Stack to include the background image behind the content.
+      body: Stack(
+        children: [
+          // Background image.
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/bg.png"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Display the currently selected page.
+          _pages[_currentIndex],
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-        items: widget.items,
+        onTap: onTabTapped,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.location_on),
+            label: 'Venue',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.supervisor_account),
+            label: 'Managers',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag),
+            label: 'Products',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.miscellaneous_services),
+            label: 'Services',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.compare_arrows),
+            label: 'Compare',
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Main HomePage using the custom bottom navigation scaffold.
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomBottomNavScaffold(
-      pages: [
-        const HomeContentPage(),
-        const VenuePage(),
-        const ManagersPage(),
-        const EventProductStorePage(),// Changed from inline ProductsPage to imported EventProductStorePage
-        const ServicesPage(),          // Now imported from services_page.dart
-        const ComparePage(),           // Now imported from compare_page.dart
-      ],
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.location_on),
-          label: 'Venue',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.supervisor_account),
-          label: 'Managers',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_bag),
-          label: 'Products',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.miscellaneous_services),
-          label: 'Services',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.compare_arrows),
-          label: 'Compare',
-        ),
-      ],
-    );
-  }
-}
-
-/// HomeContentPage displays the search bar, categories, trending venues, and featured products.
 class HomeContentPage extends StatelessWidget {
   const HomeContentPage({Key? key}) : super(key: key);
 
+  // Build the search bar widget.
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextField(
         decoration: InputDecoration(
-          hintText: 'Search events, venues, service',
+          hintText: 'Search events, venues, services',
+          filled: true,
+          fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
-          filled: true,
-          fillColor: Colors.white,
+          prefixIcon: const Icon(Icons.search),
         ),
       ),
     );
   }
 
+  // Build a category card widget.
   Widget _buildCategoryCard({
     required IconData icon,
     required Color color,
@@ -151,7 +138,6 @@ class HomeContentPage extends StatelessWidget {
         ],
       ),
     );
-
     return isFullWidth
         ? SizedBox(
       height: 150,
@@ -166,11 +152,13 @@ class HomeContentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use a Scaffold with a transparent background so the main background image shows through.
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Responsive Design'),
-        backgroundColor: Colors.blue,
+        title: const Text('Home'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: SafeArea(
         child: ListView(
@@ -220,7 +208,7 @@ class HomeContentPage extends StatelessWidget {
                         icon: Icons.shopping_cart,
                         color: Colors.yellow.shade100,
                         text: 'Product',
-                        iconColor: Colors.yellow,
+                        iconColor: Colors.orange,
                       ),
                     ),
                   ],
@@ -245,6 +233,7 @@ class HomeContentPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -289,6 +278,7 @@ class HomeContentPage extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -319,6 +309,30 @@ class HomeContentPage extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+            // Logout Button at the bottom
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  AuthService().signout(context: context);
+                },
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.redAccent.withOpacity(0.8),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -326,7 +340,7 @@ class HomeContentPage extends StatelessWidget {
   }
 }
 
-/// A card widget representing a trending venue.
+// A simple card widget for displaying a trending venue.
 class VenueCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -341,15 +355,17 @@ class VenueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only show subtitle if it's not empty.
+    // Build a list of widgets for the title and subtitle.
     List<Widget> infoWidgets = [
       Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
         textAlign: TextAlign.center,
       ),
     ];
-
     if (subtitle.isNotEmpty) {
       infoWidgets.add(const SizedBox(height: 4));
       infoWidgets.add(
@@ -363,7 +379,6 @@ class VenueCard extends StatelessWidget {
         ),
       );
     }
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -407,7 +422,7 @@ class VenueCard extends StatelessWidget {
   }
 }
 
-/// A card widget representing a featured product.
+// A simple card widget for displaying a featured product.
 class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -451,7 +466,10 @@ class ProductCard extends StatelessWidget {
                 child: Center(
                   child: Text(
                     title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
