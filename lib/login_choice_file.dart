@@ -3,8 +3,7 @@ import 'user_auth_page.dart';
 import 'manager_auth_page.dart';
 
 /// This page displays separate login options for Users, Event Managers, and Root.
-/// - Users and Root use Firebase Authentication.
-/// - Event Managers use a custom flow that stores their details in Firestore.
+
 class LoginChoicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -15,7 +14,7 @@ class LoginChoicePage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/bg.png"),
+                image: AssetImage("assets/logo.png"),
                 fit: BoxFit.cover,
               ),
             ),

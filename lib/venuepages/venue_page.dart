@@ -29,7 +29,7 @@ class VenuePage extends StatelessWidget {
           children: [
             // Left side: venue image.
             Expanded(
-              flex: 2, // Adjust relative width of the image.
+              flex: 2, // Adjust relati                                                                                                                                                                                           ve width of the image.
               child: Image.network(
                 imageUrl,
                 height: double.infinity, // Fills vertical space.

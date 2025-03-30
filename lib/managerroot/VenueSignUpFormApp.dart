@@ -27,7 +27,7 @@ class VenueSignUpForm extends StatefulWidget {
 
 class _VenueSignUpFormState extends State<VenueSignUpForm> {
   final ImagePicker _picker = ImagePicker();
-  List<File> _selectedImages = [];
+  List<File> _selectedImages =[];
   List<String> _uploadedImageUrls = [];
 
   // Controllers for venue details
@@ -59,9 +59,9 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
             .ref()
             .child('venue_uploads')
             .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-        final uploadTask = storageRef.putFile(image);
-        final snapshot = await uploadTask;
-        final imageUrl = await snapshot.ref.getDownloadURL();
+            final uploadTask = storageRef.putFile(image);
+            final snapshot = await uploadTask;
+            final imageUrl = await snapshot.ref.getDownloadURL();
         _uploadedImageUrls.add(imageUrl);
       } catch (e) {
         print("Error uploading image: $e");
@@ -134,7 +134,7 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
               ),
             ),
           ),
-          // Main content area.
+          // Main  content area.
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
