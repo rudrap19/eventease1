@@ -6,7 +6,7 @@ import 'servicepages/services_page.dart';
 import 'compare_page.dart';
 import 'auth_service.dart'; // For handling sign-out functionality
 
-/// The main HomePage widget that uses a bottom navigation bar to switch
+/// The main HomePage widget that uses a bottom navigation bar to switch  
 /// between different pages (Home, Venue, Managers, Products, Services, and Compare).
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
