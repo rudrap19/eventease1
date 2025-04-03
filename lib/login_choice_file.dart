@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'user_auth_page.dart';
 import 'manager_auth_page.dart';
 
-/// This page displays separate login options for Users, Event Managers, and Root.
-
 class LoginChoicePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -14,7 +12,7 @@ class LoginChoicePage extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/logo.png"),
+                image: AssetImage("assets/bg.png"),
                 fit: BoxFit.cover,
               ),
             ),
