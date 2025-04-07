@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth_service.dart';
+import 'user_login_page.dart'; // new login page
+import 'package:shared_preferences/shared_preferences.dart';
+import 'home_page.dart';
 
 class UserAuthPage extends StatefulWidget {
   final String role;
@@ -14,24 +18,57 @@ class UserAuthPage extends StatefulWidget {
 class _UserAuthPageState extends State<UserAuthPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     nameController.dispose();
     emailController.dispose();
-    otpController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _signup() {
-    AuthService().signup(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-      context: context,
-    );
+  void _signup() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
+
+    try {
+      await AuthService().signup(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        context: context,
+      );
+
+      await FirebaseFirestore.instance.collection('userinfo').add({
+        'name': nameController.text.trim(),
+        'email': emailController.text.trim(),
+        'password': passwordController.text.trim(),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userEmail', emailController.text.trim());
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("User signed up successfully!")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Signup failed: $e")),
+      );
+    }
   }
 
   @override
@@ -97,10 +134,11 @@ class _UserAuthPageState extends State<UserAuthPage> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
-                    controller: otpController,
+                    controller: passwordController,
+                    obscureText: true,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      labelText: 'Enter OTP',
+                      labelText: 'Password',
                       labelStyle: const TextStyle(color: Colors.white),
                       enabledBorder: OutlineInputBorder(
                         borderSide: const BorderSide(color: Colors.white70),
@@ -114,11 +152,11 @@ class _UserAuthPageState extends State<UserAuthPage> {
                   ),
                   const SizedBox(height: 20),
                   TextField(
-                    controller: passwordController,
+                    controller: confirmPasswordController,
                     obscureText: true,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: 'Confirm Password',
                       labelStyle: const TextStyle(color: Colors.white),
                       enabledBorder: OutlineInputBorder(
                         borderSide: const BorderSide(color: Colors.white70),
@@ -140,6 +178,19 @@ class _UserAuthPageState extends State<UserAuthPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserLoginPage()),
+                      );
+                    },
+                    child: const Text(
+                      'Already a user? Login',
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),
                 ],

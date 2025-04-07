@@ -20,7 +20,7 @@ class LoginChoicePage extends StatelessWidget {
           // Semi-transparent overlay.
           Container(
             color: Colors.black.withOpacity(0.5),
-          ),
+          ) ,
           // Main content.
           Center(
             child: SingleChildScrollView(
