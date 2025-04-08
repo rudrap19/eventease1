@@ -41,7 +41,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
 
       if (query.docs.isNotEmpty) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setBool('isLoggedIn', true);
+        await prefs.setBool('isLoggedIn', false);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),

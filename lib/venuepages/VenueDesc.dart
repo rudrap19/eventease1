@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import '../RegistrationPage.dart';
 
 class VenueDesc extends StatelessWidget {
   final Map<String, dynamic> venueData;
@@ -8,122 +9,133 @@ class VenueDesc extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract venue details from the passed data.
     final String name = venueData['name'] ?? 'Unnamed Venue';
     final String location = venueData['location'] ?? 'No location provided';
     final String capacity = venueData['capacity']?.toString() ?? 'N/A';
     final String venueType = venueData['venueType'] ?? 'N/A';
     final String timings = venueData['timings'] ?? 'N/A';
     final String contact = venueData['contact'] ?? 'N/A';
-
-    // Convert the dynamic list of image URLs to a List of strings.
     final List<dynamic> imageUrlsDynamic = venueData['imageUrls'] ?? [];
-    final List<String> imageUrls =
-    imageUrlsDynamic.map((e) => e.toString()).toList();
+    final List<String> imageUrls = imageUrlsDynamic.map((e) => e.toString()).toList();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(name),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
-      // Use ListView for scrolling content.
-      body: ListView(
-        padding: const EdgeInsets.all(16.0),
+      body: Stack(
         children: [
-          // Carousel slider to display multiple images.
-          if (imageUrls.isNotEmpty)
-            CarouselSlider(
-              options: CarouselOptions(
-                height: 250.0, // Adjust the height of the carousel slider here.
-                enlargeCenterPage: true,
-                autoPlay: true,
-                autoPlayInterval: const Duration(seconds: 3),
+          // Background
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/bg.png"),
+                fit: BoxFit.cover,
               ),
-              items: imageUrls.map((url) {
-                return Builder(
-                  builder: (BuildContext context) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                      // Wrap the image in a ClipRRect to provide rounded corners.
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12), // Change radius here.
-                        child: Image.network(
-                          url,
-                          fit: BoxFit.cover, // Adjust how the image fits inside its container.
-                          width: double.infinity, // Change width if needed.
-                        ),
+            ),
+          ),
+          // Overlay
+          Container(color: Colors.black.withOpacity(0.3)),
+
+          // Content
+          SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                if (imageUrls.isNotEmpty)
+                  CarouselSlider(
+                    options: CarouselOptions(
+                      height: 250.0,
+                      enlargeCenterPage: true,
+                      autoPlay: true,
+                      autoPlayInterval: const Duration(seconds: 3),
+                    ),
+                    items: imageUrls.map((url) {
+                      return Builder(
+                        builder: (BuildContext context) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              url,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  )
+                else
+                  Container(
+                    height: 250,
+                    color: Colors.grey[300],
+                    child: const Center(child: Text("No images available")),
+                  ),
+                const SizedBox(height: 16),
+
+                Text(
+                  name,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+
+                _buildInfoRow(Icons.location_on, location),
+                _buildInfoRow(Icons.people, "Capacity: $capacity"),
+                _buildInfoRow(Icons.category, "Type: $venueType"),
+                _buildInfoRow(Icons.access_time, "Timings: $timings"),
+                _buildInfoRow(Icons.phone, "Contact: $contact"),
+
+                if (venueData['description'] != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    venueData['description'],
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                  ),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Book Venue Button
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                    );
-                  },
-                );
-              }).toList(),
-            )
-          else
-          // Display a placeholder if there are no images.
-            Container(
-              height: 250, // Same height as the carousel.
-              color: Colors.grey[300],
-              child: const Center(child: Text("No images available")),
+                    ),
+                    child: const Text("Book Venue", style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+              ],
             ),
-          const SizedBox(height: 16),
-          // Venue name
-          Text(
-            name,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 8),
-          // Location row
-          Row(
-            children: [
-              const Icon(Icons.location_on, size: 20),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(location, style: const TextStyle(fontSize: 16)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // Capacity row
-          Row(
-            children: [
-              const Icon(Icons.people, size: 20),
-              const SizedBox(width: 4),
-              Text("Capacity: $capacity", style: const TextStyle(fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // Venue type row
-          Row(
-            children: [
-              const Icon(Icons.category, size: 20),
-              const SizedBox(width: 4),
-              Text("Type: $venueType", style: const TextStyle(fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // Timings row
-          Row(
-            children: [
-              const Icon(Icons.access_time, size: 20),
-              const SizedBox(width: 4),
-              Text("Timings: $timings", style: const TextStyle(fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          // Contact row
-          Row(
-            children: [
-              const Icon(Icons.phone, size: 20),
-              const SizedBox(width: 4),
-              Text("Contact: $contact", style: const TextStyle(fontSize: 16)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Additional description if available.
-          if (venueData['description'] != null)
-            Text(
-              venueData['description'],
-              style: const TextStyle(fontSize: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.white),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 16, color: Colors.white),
             ),
+          ),
         ],
       ),
     );

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
-import 'managerroot/ManagerSignUpFormApp.dart';
+import 'managerroot/ManagerSignUpSelection.dart';
 import 'managerroot/managersignin.dart';
 
 class ManagerAuthPage extends StatefulWidget {
@@ -58,7 +58,7 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => ManagerSignUpForm()),
+        MaterialPageRoute(builder: (context) => ManagerSignupSelection()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

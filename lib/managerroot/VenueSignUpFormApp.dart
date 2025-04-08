@@ -27,20 +27,20 @@ class VenueSignUpForm extends StatefulWidget {
 
 class _VenueSignUpFormState extends State<VenueSignUpForm> {
   final ImagePicker _picker = ImagePicker();
-  List<File> _selectedImages =[];
+  List<File> _selectedImages = [];
   List<String> _uploadedImageUrls = [];
 
-  // Controllers for venue details
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _capacityController = TextEditingController();
-  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _plotNoController = TextEditingController();
+  final TextEditingController _areaController = TextEditingController();
+  final TextEditingController _townController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
   final TextEditingController _timingsController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
 
-  // Radio button selection for venue type with a default value.
   String _venueType = "Club";
 
-  // Pick multiple images from the gallery.
   Future<void> _pickImages() async {
     final List<XFile>? pickedFiles = await _picker.pickMultiImage();
     if (pickedFiles != null) {
@@ -50,7 +50,6 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
     }
   }
 
-  // Upload each image to Firebase Storage and collect its download URL.
   Future<void> _uploadImages() async {
     _uploadedImageUrls = [];
     for (var image in _selectedImages) {
@@ -59,9 +58,9 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
             .ref()
             .child('venue_uploads')
             .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-            final uploadTask = storageRef.putFile(image);
-            final snapshot = await uploadTask;
-            final imageUrl = await snapshot.ref.getDownloadURL();
+        final uploadTask = storageRef.putFile(image);
+        final snapshot = await uploadTask;
+        final imageUrl = await snapshot.ref.getDownloadURL();
         _uploadedImageUrls.add(imageUrl);
       } catch (e) {
         print("Error uploading image: $e");
@@ -70,9 +69,7 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
     setState(() {});
   }
 
-  // Store the venue data (including the list of image URLs) in the Firestore collection "venuedata".
   Future<void> _storeVenueData() async {
-    // Upload images if any are selected.
     if (_selectedImages.isNotEmpty) {
       await _uploadImages();
     }
@@ -82,22 +79,28 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
         'name': _nameController.text.trim(),
         'capacity': int.tryParse(_capacityController.text.trim()) ?? 0,
         'venueType': _venueType,
-        'location': _locationController.text.trim(),
+        'plotNo': _plotNoController.text.trim(),
+        'area': _areaController.text.trim(),
+        'town': _townController.text.trim(),
+        'city': _cityController.text.trim(),
         'timings': _timingsController.text.trim(),
         'contact': _contactController.text.trim(),
         'imageUrls': _uploadedImageUrls,
       });
       print("Venue data stored successfully.");
-      // Optionally, clear the form fields after a successful upload.
+
       _nameController.clear();
       _capacityController.clear();
-      _locationController.clear();
+      _plotNoController.clear();
+      _areaController.clear();
+      _townController.clear();
+      _cityController.clear();
       _timingsController.clear();
       _contactController.clear();
       setState(() {
         _selectedImages = [];
         _uploadedImageUrls = [];
-        _venueType = "Club"; // Reset to default
+        _venueType = "Club";
       });
     } catch (e) {
       print("Error storing venue data: $e");
@@ -108,7 +111,10 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
   void dispose() {
     _nameController.dispose();
     _capacityController.dispose();
-    _locationController.dispose();
+    _plotNoController.dispose();
+    _areaController.dispose();
+    _townController.dispose();
+    _cityController.dispose();
     _timingsController.dispose();
     _contactController.dispose();
     super.dispose();
@@ -117,7 +123,6 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Added background image using a Stack.
       appBar: AppBar(
         title: const Text("Venue Sign Up Form"),
         backgroundColor: Colors.transparent,
@@ -125,7 +130,6 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
       ),
       body: Stack(
         children: [
-          // Background image container.
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -134,12 +138,10 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
               ),
             ),
           ),
-          // Main  content area.
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Section for image selection.
                 Text(
                   "Upload Venue Images",
                   style: Theme.of(context).textTheme.titleLarge,
@@ -171,20 +173,17 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
                   child: const Text("Pick Images"),
                 ),
                 const SizedBox(height: 16),
-                // Text field for Venue Name.
                 TextField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: "Venue Name"),
                 ),
                 const SizedBox(height: 8),
-                // Text field for Capacity.
                 TextField(
                   controller: _capacityController,
                   decoration: const InputDecoration(labelText: "Capacity"),
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 8),
-                // Label for Venue Type with updated text style.
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -195,7 +194,6 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
                     ),
                   ),
                 ),
-                // Radio buttons for Venue Type.
                 Row(
                   children: [
                     Radio<String>(
@@ -245,19 +243,31 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
                   ],
                 ),
                 const SizedBox(height: 8),
-                // Text field for Location.
                 TextField(
-                  controller: _locationController,
-                  decoration: const InputDecoration(labelText: "Location"),
+                  controller: _plotNoController,
+                  decoration: const InputDecoration(labelText: "Shop No / Plot No"),
                 ),
                 const SizedBox(height: 8),
-                // Text field for Timings.
+                TextField(
+                  controller: _areaController,
+                  decoration: const InputDecoration(labelText: "Street / Area"),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _townController,
+                  decoration: const InputDecoration(labelText: "Town"),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _cityController,
+                  decoration: const InputDecoration(labelText: "City"),
+                ),
+                const SizedBox(height: 8),
                 TextField(
                   controller: _timingsController,
                   decoration: const InputDecoration(labelText: "Timings"),
                 ),
                 const SizedBox(height: 8),
-                // Text field for Contact Number.
                 TextField(
                   controller: _contactController,
                   decoration: const InputDecoration(labelText: "Contact Number"),
