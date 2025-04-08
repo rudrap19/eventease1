@@ -4,10 +4,8 @@ import 'manager_page.dart';
 import 'productpages/product_page.dart';
 import 'servicepages/services_page.dart';
 import 'compare_page.dart';
-import 'auth_service.dart'; // For handling sign-out functionality
+import 'auth_service.dart';
 
-/// The main HomePage widget that uses a bottom navigation bar to switch  
-/// between different pages (Home, Venue, Managers, Products, Services, and Compare).
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -15,12 +13,9 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-/// The state of HomePage where the current tab index is maintained.
 class _HomePageState extends State<HomePage> {
-
   int _currentIndex = 0;
 
-  // List of pages corresponding to the bottom navigation items.
   final List<Widget> _pages = const [
     HomeContentPage(),
     VenuePage(),
@@ -30,7 +25,6 @@ class _HomePageState extends State<HomePage> {
     ComparePage(),
   ];
 
-  /// Updates the current index when a bottom navigation item is tapped.
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -40,10 +34,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Using a Stack allows us to place the background image behind the page content.
       body: Stack(
         children: [
-          // Background image covering the entire screen.
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -52,11 +44,9 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          // The content of the currently selected page.
           _pages[_currentIndex],
         ],
       ),
-      // Bottom navigation bar for switching between pages.
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: onTabTapped,
@@ -92,15 +82,9 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-/// The HomeContentPage displays the main content for the Home tab, which includes:
-/// - A search bar
-/// - Category cards for navigation
-/// - Sections for Trending Venues and Featured Products
-/// - A Logout button
 class HomeContentPage extends StatelessWidget {
   const HomeContentPage({Key? key}) : super(key: key);
 
-  /// Builds a search bar widget at the top of the page.
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -149,87 +133,102 @@ class HomeContentPage extends StatelessWidget {
       ),
     );
 
-    // Return a full-width card or a square card based on the flag.
     return isFullWidth
-        ? SizedBox(
-      height: 150,
-      width: double.infinity,
-      child: cardContent,
-    )
-        : AspectRatio(
-      aspectRatio: 1,
-      child: cardContent,
-    );
+        ? SizedBox(height: 150, width: double.infinity, child: cardContent)
+        : AspectRatio(aspectRatio: 1, child: cardContent);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Transparent background lets the main background image from HomePage show through.
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Home'),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      // The content is wrapped in a SafeArea and a ListView for scrolling.
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // Search bar section
             _buildSearchBar(),
-
-            // Categories Section: a grid of cards for different categories.
             Column(
               children: [
-                // First row with two category cards.
                 Row(
                   children: [
                     Expanded(
-                      child: _buildCategoryCard(
-                        icon: Icons.calendar_today,
-                        color: Colors.blue.shade100,
-                        text: 'Event Management',
-                        iconColor: Colors.blue,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ManagersPage()),
+                          );
+                        },
+                        child: _buildCategoryCard(
+                          icon: Icons.calendar_today,
+                          color: Colors.blue.shade100,
+                          text: 'Event Management',
+                          iconColor: Colors.blue,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _buildCategoryCard(
-                        icon: Icons.person,
-                        color: Colors.purple.shade100,
-                        text: 'Individual Service',
-                        iconColor: Colors.purple,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ServicesPage()),
+                          );
+                        },
+                        child: _buildCategoryCard(
+                          icon: Icons.person,
+                          color: Colors.purple.shade100,
+                          text: 'Individual Service',
+                          iconColor: Colors.purple,
+                        ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                // Second row with two more cards.
                 Row(
                   children: [
                     Expanded(
-                      child: _buildCategoryCard(
-                        icon: Icons.location_on,
-                        color: Colors.green.shade100,
-                        text: 'Venue',
-                        iconColor: Colors.green,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const VenuePage()),
+                          );
+                        },
+                        child: _buildCategoryCard(
+                          icon: Icons.location_on,
+                          color: Colors.green.shade100,
+                          text: 'Venue',
+                          iconColor: Colors.green,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: _buildCategoryCard(
-                        icon: Icons.shopping_cart,
-                        color: Colors.yellow.shade100,
-                        text: 'Product',
-                        iconColor: Colors.orange,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const EventProductStorePage()),
+                          );
+                        },
+                        child: _buildCategoryCard(
+                          icon: Icons.shopping_cart,
+                          color: Colors.yellow.shade100,
+                          text: 'Product',
+                          iconColor: Colors.orange,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                // A full-width card for the Compare category.
                 _buildCategoryCard(
                   icon: Icons.star,
                   color: Colors.pink.shade100,
@@ -237,11 +236,10 @@ class HomeContentPage extends StatelessWidget {
                   iconColor: Colors.pink,
                   isFullWidth: true,
                 ),
+
               ],
             ),
             const SizedBox(height: 24),
-
-            // Trending Venues Section header.
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -254,7 +252,6 @@ class HomeContentPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Grid view showing trending venues using custom VenueCard widgets.
             GridView.count(
               crossAxisCount: 2,
               childAspectRatio: 1,
@@ -286,8 +283,6 @@ class HomeContentPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Featured Products Section header.
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -300,7 +295,6 @@ class HomeContentPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Grid view for featured products using custom ProductCard widgets.
             GridView.count(
               crossAxisCount: 2,
               childAspectRatio: 1,
@@ -328,12 +322,9 @@ class HomeContentPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-
-            // Logout Button: Allows the user to sign out.
             Center(
               child: TextButton(
                 onPressed: () {
-                  // Calls the signout method from AuthService.
                   AuthService().signout(context: context);
                 },
                 child: const Text(
@@ -360,7 +351,6 @@ class HomeContentPage extends StatelessWidget {
   }
 }
 
-/// A custom card widget for displaying a trending venue.
 class VenueCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -375,7 +365,6 @@ class VenueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Build a list of text widgets for the title and subtitle.
     List<Widget> infoWidgets = [
       Text(
         title,
@@ -387,7 +376,6 @@ class VenueCard extends StatelessWidget {
       ),
     ];
 
-    // Add subtitle text if it's not empty.
     if (subtitle.isNotEmpty) {
       infoWidgets.add(const SizedBox(height: 4));
       infoWidgets.add(
@@ -418,7 +406,6 @@ class VenueCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
-            // Image section takes up two-thirds of the card.
             Expanded(
               flex: 2,
               child: Image.network(
@@ -427,7 +414,6 @@ class VenueCard extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            // Text section for title/subtitle.
             Expanded(
               flex: 1,
               child: Padding(
@@ -447,7 +433,6 @@ class VenueCard extends StatelessWidget {
   }
 }
 
-/// A custom card widget for displaying a featured product.
 class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String title;
@@ -476,7 +461,6 @@ class ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
-            // Image section.
             Expanded(
               flex: 2,
               child: Image.network(
@@ -485,7 +469,6 @@ class ProductCard extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            // Title text section.
             Expanded(
               flex: 1,
               child: Padding(
