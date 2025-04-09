@@ -229,13 +229,23 @@ class HomeContentPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                _buildCategoryCard(
-                  icon: Icons.star,
-                  color: Colors.pink.shade100,
-                  text: 'Compare',
-                  iconColor: Colors.pink,
-                  isFullWidth: true,
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ComparePage()),
+                    );
+                  },
+                  child: _buildCategoryCard(
+                    icon: Icons.star,
+                    color: Colors.pink.shade100,
+                    text: 'Compare',
+                    iconColor: Colors.pink,
+                    isFullWidth: true,
+                  ),
                 ),
+
 
               ],
             ),
