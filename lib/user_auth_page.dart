@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'user_login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'home_page.dart';
+import 'user_login_page.dart';
 
 class UserAuthPage extends StatefulWidget {
   final String role;
@@ -44,27 +45,30 @@ class _UserAuthPageState extends State<UserAuthPage> {
         password: passwordController.text.trim(),
       );
 
-      // Send verification email
+      // Send verification link
       await userCredential.user?.sendEmailVerification();
 
-      // Save user info to Firestore
+      // Store user info in Firestore
       await FirebaseFirestore.instance.collection('userinfo').add({
         'name': nameController.text.trim(),
         'email': emailController.text.trim(),
+        'password': passwordController.text.trim(),
+        'verified': false,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
+      // Store local login status
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', false);
+      await prefs.setBool('isLoggedIn', true);
       await prefs.setString('userEmail', emailController.text.trim());
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Verification email sent. Please verify your email before logging in.")),
+        const SnackBar(content: Text("Verification email sent. Redirecting to Home...")),
       );
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const UserLoginPage()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
