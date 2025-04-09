@@ -61,56 +61,6 @@ class EventProductStorePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16.0),
 
-                // Category buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    CategoryButton(label: 'All', isSelected: true),
-                    CategoryButton(label: 'Party Poppers'),
-                    CategoryButton(label: 'Party Guns'),
-                  ],
-                ),
-                const SizedBox(height: 16.0),
-
-                // Special Offer Card
-                Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Colors.purple, Colors.pink]),
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Special Party Bundle',
-                                style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold),
-                              ),
-                              Text('Get 30% off on selected items', style: TextStyle(color: Colors.white)),
-                            ],
-                          ),
-                          Icon(Icons.tag, color: Colors.white, size: 30.0),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.purple,
-                          backgroundColor: Colors.white,
-                          shape: const StadiumBorder(),
-                        ),
-                        child: const Text('Shop Now'),
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 16.0),
 
                 const Text(
