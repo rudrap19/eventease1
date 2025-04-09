@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'auth_service.dart';
-import 'user_login_page.dart'; // new login page
+import 'package:firebase_auth/firebase_auth.dart';
+import 'user_login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'home_page.dart';
 
 class UserAuthPage extends StatefulWidget {
   final String role;
@@ -31,7 +30,6 @@ class _UserAuthPageState extends State<UserAuthPage> {
   }
 
   void _signup() async {
-    final prefs = await SharedPreferences.getInstance();
     if (passwordController.text != confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Passwords do not match")),
@@ -40,29 +38,33 @@ class _UserAuthPageState extends State<UserAuthPage> {
     }
 
     try {
-      await AuthService().signup(
+      final auth = FirebaseAuth.instance;
+      final UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
-        context: context,
       );
 
+      // Send verification email
+      await userCredential.user?.sendEmailVerification();
+
+      // Save user info to Firestore
       await FirebaseFirestore.instance.collection('userinfo').add({
         'name': nameController.text.trim(),
         'email': emailController.text.trim(),
-        'password': passwordController.text.trim(),
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      await prefs.setBool('isLoggedIn', true);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', false);
       await prefs.setString('userEmail', emailController.text.trim());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Verification email sent. Please verify your email before logging in.")),
+      );
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User signed up successfully!")),
+        MaterialPageRoute(builder: (context) => const UserLoginPage()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
