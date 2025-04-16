@@ -1,9 +1,14 @@
+import 'package:eventease1/managerroot/ManagerSignUpFormApp.dart';
+import 'package:eventease1/managerroot/ProductSignupFormApp.dart';
+import 'package:eventease1/managerroot/ServiceSignUpFormApp.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
 import '../user_auth_page.dart';
 import '../manager_auth_page.dart';
 import 'VenueSignUpFormApp.dart';
+
+
 class ManagerSignupSelection extends StatefulWidget {
   const ManagerSignupSelection({Key? key}) : super(key: key);
 
@@ -26,7 +31,7 @@ class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ManagerAuthPage(role: "Event Manager"),
+          builder: (context) => ManagerSignUpFormApp(),
         ),
       );
     } else if (_selectedOption == "Venue") {
@@ -40,14 +45,14 @@ class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserAuthPage(role: "Services"),
+          builder: (context) => ServiceSignUpFormApp(),
         ),
       );
     } else if (_selectedOption == "Products") {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserAuthPage(role: "Products"),
+          builder: (context) => ProductSignUpFormApp()
         ),
       );
     }
