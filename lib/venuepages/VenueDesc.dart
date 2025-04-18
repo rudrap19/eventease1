@@ -10,11 +10,19 @@ class VenueDesc extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String name = venueData['name'] ?? 'Unnamed Venue';
-    final String location = venueData['location'] ?? 'No location provided';
     final String capacity = venueData['capacity']?.toString() ?? 'N/A';
     final String venueType = venueData['venueType'] ?? 'N/A';
     final String timings = venueData['timings'] ?? 'N/A';
     final String contact = venueData['contact'] ?? 'N/A';
+
+    // Updated location string using individual fields
+    final String location = [
+      venueData['plotNo'],
+      venueData['area'],
+      venueData['town'],
+      venueData['city'],
+    ].where((e) => e != null && e.toString().isNotEmpty).join(', ');
+
     final List<dynamic> imageUrlsDynamic = venueData['imageUrls'] ?? [];
     final List<String> imageUrls = imageUrlsDynamic.map((e) => e.toString()).toList();
 
@@ -26,7 +34,6 @@ class VenueDesc extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Background
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -35,10 +42,7 @@ class VenueDesc extends StatelessWidget {
               ),
             ),
           ),
-          // Overlay
           Container(color: Colors.black.withOpacity(0.3)),
-
-          // Content
           SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16.0),
@@ -73,19 +77,16 @@ class VenueDesc extends StatelessWidget {
                     child: const Center(child: Text("No images available")),
                   ),
                 const SizedBox(height: 16),
-
                 Text(
                   name,
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 8),
-
                 _buildInfoRow(Icons.location_on, location),
                 _buildInfoRow(Icons.people, "Capacity: $capacity"),
                 _buildInfoRow(Icons.category, "Type: $venueType"),
                 _buildInfoRow(Icons.access_time, "Timings: $timings"),
                 _buildInfoRow(Icons.phone, "Contact: $contact"),
-
                 if (venueData['description'] != null) ...[
                   const SizedBox(height: 12),
                   Text(
@@ -93,10 +94,7 @@ class VenueDesc extends StatelessWidget {
                     style: const TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                 ],
-
                 const SizedBox(height: 24),
-
-                // Book Venue Button
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
