@@ -1,14 +1,17 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
+import '../managerroot/ManagerPageroot.dart'; // Adjust the path if needed
 
 void main() {
-  runApp(VenueSignUpFormApp());
+  runApp(const VenueSignUpFormApp());
 }
 
 class VenueSignUpFormApp extends StatelessWidget {
+  const VenueSignUpFormApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -19,10 +22,10 @@ class VenueSignUpFormApp extends StatelessWidget {
 }
 
 class VenueSignUpForm extends StatefulWidget {
-  const VenueSignUpForm({Key? key}) : super(key: key);
+  const VenueSignUpForm({super.key});
 
   @override
-  _VenueSignUpFormState createState() => _VenueSignUpFormState();
+  State<VenueSignUpForm> createState() => _VenueSignUpFormState();
 }
 
 class _VenueSignUpFormState extends State<VenueSignUpForm> {
@@ -51,22 +54,17 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
   }
 
   Future<void> _uploadImages() async {
-    _uploadedImageUrls = [];
+    _uploadedImageUrls.clear();
     for (var image in _selectedImages) {
-      try {
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('venue_uploads')
-            .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
-        final uploadTask = storageRef.putFile(image);
-        final snapshot = await uploadTask;
-        final imageUrl = await snapshot.ref.getDownloadURL();
-        _uploadedImageUrls.add(imageUrl);
-      } catch (e) {
-        print("Error uploading image: $e");
-      }
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('venue_uploads')
+          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final uploadTask = storageRef.putFile(image);
+      final snapshot = await uploadTask;
+      final imageUrl = await snapshot.ref.getDownloadURL();
+      _uploadedImageUrls.add(imageUrl);
     }
-    setState(() {});
   }
 
   Future<void> _storeVenueData() async {
@@ -86,9 +84,10 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
         'timings': _timingsController.text.trim(),
         'contact': _contactController.text.trim(),
         'imageUrls': _uploadedImageUrls,
+        'timestamp': FieldValue.serverTimestamp(),
       });
-      print("Venue data stored successfully.");
 
+      // Clear form
       _nameController.clear();
       _capacityController.clear();
       _plotNoController.clear();
@@ -98,12 +97,21 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
       _timingsController.clear();
       _contactController.clear();
       setState(() {
-        _selectedImages = [];
-        _uploadedImageUrls = [];
+        _selectedImages.clear();
+        _uploadedImageUrls.clear();
         _venueType = "Club";
       });
+
+      // ✅ Redirect to manager root
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ManagerPageroot()),
+      );
     } catch (e) {
       print("Error storing venue data: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
     }
   }
 
@@ -123,11 +131,7 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Venue Sign Up Form"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text("Venue Sign Up Form")),
       body: Stack(
         children: [
           Container(
@@ -173,25 +177,25 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
                   child: const Text("Pick Images"),
                 ),
                 const SizedBox(height: 16),
+
                 TextField(
                   controller: _nameController,
                   decoration: const InputDecoration(labelText: "Venue Name"),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _capacityController,
                   decoration: const InputDecoration(labelText: "Capacity"),
                   keyboardType: TextInputType.number,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
+
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "Venue Type:",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
                 Row(
@@ -199,21 +203,13 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
                     Radio<String>(
                       value: "Club",
                       groupValue: _venueType,
-                      onChanged: (value) {
-                        setState(() {
-                          _venueType = value!;
-                        });
-                      },
+                      onChanged: (value) => setState(() => _venueType = value!),
                     ),
                     const Text("Club"),
                     Radio<String>(
                       value: "Party Hall",
                       groupValue: _venueType,
-                      onChanged: (value) {
-                        setState(() {
-                          _venueType = value!;
-                        });
-                      },
+                      onChanged: (value) => setState(() => _venueType = value!),
                     ),
                     const Text("Party Hall"),
                   ],
@@ -223,57 +219,56 @@ class _VenueSignUpFormState extends State<VenueSignUpForm> {
                     Radio<String>(
                       value: "Open Grounds",
                       groupValue: _venueType,
-                      onChanged: (value) {
-                        setState(() {
-                          _venueType = value!;
-                        });
-                      },
+                      onChanged: (value) => setState(() => _venueType = value!),
                     ),
                     const Text("Open Grounds"),
                     Radio<String>(
                       value: "Lounge",
                       groupValue: _venueType,
-                      onChanged: (value) {
-                        setState(() {
-                          _venueType = value!;
-                        });
-                      },
+                      onChanged: (value) => setState(() => _venueType = value!),
                     ),
                     const Text("Lounge"),
                   ],
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _plotNoController,
                   decoration: const InputDecoration(labelText: "Shop No / Plot No"),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _areaController,
                   decoration: const InputDecoration(labelText: "Street / Area"),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _townController,
                   decoration: const InputDecoration(labelText: "Town"),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _cityController,
                   decoration: const InputDecoration(labelText: "City"),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _timingsController,
                   decoration: const InputDecoration(labelText: "Timings"),
                 ),
                 const SizedBox(height: 8),
+
                 TextField(
                   controller: _contactController,
                   decoration: const InputDecoration(labelText: "Contact Number"),
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 16),
+
                 ElevatedButton(
                   onPressed: _storeVenueData,
                   child: const Text("Submit Venue Data"),

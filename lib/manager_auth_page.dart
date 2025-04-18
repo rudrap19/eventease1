@@ -61,10 +61,7 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
         await prefs.setString('userEmail', email);
         await prefs.setString('userRole', 'manager');
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const ManagerSignupSelection()),
-        );
+
       } catch (e) {
         _showMessage("Signup failed: $e");
       }

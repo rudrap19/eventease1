@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ManagersPage extends StatelessWidget {
   const ManagersPage({Key? key}) : super(key: key);
 
-  // Helper method to build a manager card.
   Widget _buildManagerCard({
     required String imageUrl,
     required String name,
@@ -54,10 +53,9 @@ class ManagersPage extends StatelessWidget {
     );
   }
 
-  // Build the grid view dynamically from Firestore.
   Widget _buildManagersGrid() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('managers').snapshots(),
+      stream: FirebaseFirestore.instance.collection('managerinfo').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -75,7 +73,7 @@ class ManagersPage extends StatelessWidget {
           children: managers.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             final String name = data['name'] ?? 'Unnamed Manager';
-            final String imageUrl = data['imageUrl'] ?? 'https://placehold.co/300x300';
+            final String imageUrl = data['imgUrl'] ?? 'https://placehold.co/300x300';
             return _buildManagerCard(
               imageUrl: imageUrl,
               name: name,
