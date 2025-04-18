@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'ServiceDesc.dart'; // Make sure this file is correctly placed and imported
 
 class ServicesPage extends StatelessWidget {
   const ServicesPage({Key? key}) : super(key: key);
@@ -48,9 +49,9 @@ class ServicesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesGrid() {
+  Widget _buildServicesGrid(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('service_data').snapshots(),
+      stream: FirebaseFirestore.instance.collection('servicedata').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -75,9 +76,19 @@ class ServicesPage extends StatelessWidget {
                 ? imageUrls[0]
                 : 'https://placehold.co/300x300';
 
-            return _buildServiceCard(
-              imageUrl: imageUrl,
-              name: name,
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ServiceDesc(serviceData: data),
+                  ),
+                );
+              },
+              child: _buildServiceCard(
+                imageUrl: imageUrl,
+                name: name,
+              ),
             );
           }).toList(),
         );
@@ -104,7 +115,7 @@ class ServicesPage extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _buildServicesGrid(),
+              child: _buildServicesGrid(context),
             ),
           ),
         ],

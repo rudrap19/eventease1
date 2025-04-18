@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../RegistrationPage.dart'; // Import RegistrationPage
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'ProductDesc.dart'; // Make sure this file exists and is implemented
+import '../RegistrationPage.dart';
 
 class EventProductStorePage extends StatelessWidget {
   const EventProductStorePage({Key? key}) : super(key: key);
@@ -22,7 +24,6 @@ class EventProductStorePage extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -31,9 +32,7 @@ class EventProductStorePage extends StatelessWidget {
               ),
             ),
           ),
-          // Overlay
           Container(color: Colors.black.withOpacity(0.5)),
-          // Content
           SingleChildScrollView(
             padding: const EdgeInsets.only(
               top: kToolbarHeight + 24,
@@ -44,7 +43,6 @@ class EventProductStorePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Search bar
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   decoration: BoxDecoration(
@@ -61,52 +59,58 @@ class EventProductStorePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16.0),
 
-                const SizedBox(height: 16.0),
-
                 const Text(
                   'Featured Products',
                   style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 16.0),
 
-                // Featured products grid
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  children: const [
-                    ProductCard(
-                      imageUrl: 'https://placehold.co/150x100',
-                      name: 'Confetti Party Popper',
-                      rating: 4.5,
-                      price: 100,
-                    ),
-                    ProductCard(
-                      imageUrl: 'https://placehold.co/150x100',
-                      name: 'Celebration Party Gun',
-                      rating: 4.8,
-                      price: 2000,
-                    ),
-                    ProductCard(
-                      imageUrl: 'https://placehold.co/150x100',
-                      name: 'Rose Bouquet Mix',
-                      rating: 4.7,
-                      price: 300,
-                    ),
-                    ProductCard(
-                      imageUrl: 'https://placehold.co/150x100',
-                      name: 'Rainbow Popper Set',
-                      rating: 4.6,
-                      price: 800,
-                    ),
-                  ],
+                StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('productdata').snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text("Error: ${snapshot.error}"));
+                    }
+
+                    final products = snapshot.data!.docs;
+
+                    return GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.75,
+                      children: products.map((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        final imageUrl = (data['imageUrls'] ?? ['https://placehold.co/150x100'])[0];
+                        final name = data['productName'] ?? 'No Name';
+                        final price = int.tryParse(data['price']?.toString() ?? '0') ?? 0;
+
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ProductDesc(productData: data)),
+                            );
+                          },
+                          child: ProductCard(
+                            imageUrl: imageUrl,
+                            name: name,
+                            rating: 4.5, // Replace with real rating if available
+                            price: price,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 24.0),
 
-                // Book Venue Button
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
@@ -130,26 +134,6 @@ class EventProductStorePage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class CategoryButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-
-  const CategoryButton({required this.label, this.isSelected = false, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        foregroundColor: isSelected ? Colors.white : Colors.grey[600],
-        backgroundColor: isSelected ? Colors.red : Colors.grey[200],
-        shape: const StadiumBorder(),
-      ),
-      child: Text(label),
     );
   }
 }
