@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../ManagerDesc.dart'; // Make sure this file exists and is correctly named
 
 class ManagersPage extends StatelessWidget {
   const ManagersPage({Key? key}) : super(key: key);
@@ -53,9 +54,9 @@ class ManagersPage extends StatelessWidget {
     );
   }
 
-  Widget _buildManagersGrid() {
+  Widget _buildManagersGrid(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('managerinfo').snapshots(),
+      stream: FirebaseFirestore.instance.collection('manager_data1').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -63,7 +64,9 @@ class ManagersPage extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(child: Text("Error: ${snapshot.error}"));
         }
+
         final managers = snapshot.data!.docs;
+
         return GridView.count(
           padding: const EdgeInsets.only(bottom: 12),
           crossAxisCount: 2,
@@ -73,10 +76,24 @@ class ManagersPage extends StatelessWidget {
           children: managers.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             final String name = data['name'] ?? 'Unnamed Manager';
-            final String imageUrl = data['imgUrl'] ?? 'https://placehold.co/300x300';
-            return _buildManagerCard(
-              imageUrl: imageUrl,
-              name: name,
+            final List<dynamic> imageUrls = data['imageUrls'] ?? [];
+            final String imageUrl = imageUrls.isNotEmpty
+                ? imageUrls[0]
+                : 'https://placehold.co/300x300';
+
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ManagerDesc(managerData: data),
+                  ),
+                );
+              },
+              child: _buildManagerCard(
+                imageUrl: imageUrl,
+                name: name,
+              ),
             );
           }).toList(),
         );
@@ -103,7 +120,7 @@ class ManagersPage extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _buildManagersGrid(),
+              child: _buildManagersGrid(context),
             ),
           ),
         ],

@@ -76,7 +76,7 @@ class _ManagerSignUpFormState extends State<ManagerSignUpForm> {
       await _uploadImages();
     }
     try {
-      await FirebaseFirestore.instance.collection('managerdata').add({
+      await FirebaseFirestore.instance.collection('manager_data1').add({
         'name': _nameController.text.trim(),
         'experience': _experienceController.text.trim(),
         'typesOfEvent': _typesController.text.trim(),

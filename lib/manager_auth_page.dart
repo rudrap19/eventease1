@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 import 'managerroot/ManagerPageroot.dart';
-import 'managerroot/ManagerSignUpSelection.dart';
+import 'managerroot/ManagerSignupSelection.dart';
 
 class ManagerAuthPage extends StatefulWidget {
   final String role;
@@ -61,7 +61,10 @@ class _ManagerAuthPageState extends State<ManagerAuthPage> {
         await prefs.setString('userEmail', email);
         await prefs.setString('userRole', 'manager');
 
-
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ManagerSignupSelection ()),
+        );
       } catch (e) {
         _showMessage("Signup failed: $e");
       }

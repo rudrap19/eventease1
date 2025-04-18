@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'venuepages/venue_page.dart';
+import 'venuepages/venuedesc.dart';
 import 'manager_page.dart';
 import 'productpages/product_page.dart';
+import 'productpages/productdesc.dart';
 import 'servicepages/services_page.dart';
-import 'compare_page.dart';
 import 'auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -22,7 +26,6 @@ class _HomePageState extends State<HomePage> {
     ManagersPage(),
     EventProductStorePage(),
     ServicesPage(),
-    ComparePage(),
   ];
 
   void onTabTapped(int index) {
@@ -52,30 +55,11 @@ class _HomePageState extends State<HomePage> {
         onTap: onTabTapped,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.location_on),
-            label: 'Venue',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.supervisor_account),
-            label: 'Managers',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: 'Products',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.miscellaneous_services),
-            label: 'Services',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.compare_arrows),
-            label: 'Compare',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.location_on), label: 'Venue'),
+          BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: 'Managers'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Products'),
+          BottomNavigationBarItem(icon: Icon(Icons.miscellaneous_services), label: 'Services'),
         ],
       ),
     );
@@ -124,10 +108,7 @@ class HomeContentPage extends StatelessWidget {
             text,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ],
       ),
@@ -158,12 +139,7 @@ class HomeContentPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ManagersPage()),
-                          );
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ManagersPage())),
                         child: _buildCategoryCard(
                           icon: Icons.calendar_today,
                           color: Colors.blue.shade100,
@@ -175,12 +151,7 @@ class HomeContentPage extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ServicesPage()),
-                          );
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ServicesPage())),
                         child: _buildCategoryCard(
                           icon: Icons.person,
                           color: Colors.purple.shade100,
@@ -196,12 +167,7 @@ class HomeContentPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const VenuePage()),
-                          );
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const VenuePage())),
                         child: _buildCategoryCard(
                           icon: Icons.location_on,
                           color: Colors.green.shade100,
@@ -213,12 +179,7 @@ class HomeContentPage extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const EventProductStorePage()),
-                          );
-                        },
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EventProductStorePage())),
                         child: _buildCategoryCard(
                           icon: Icons.shopping_cart,
                           color: Colors.yellow.shade100,
@@ -229,24 +190,6 @@ class HomeContentPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ComparePage()),
-                    );
-                  },
-                  child: _buildCategoryCard(
-                    icon: Icons.star,
-                    color: Colors.pink.shade100,
-                    text: 'Compare',
-                    iconColor: Colors.pink,
-                    isFullWidth: true,
-                  ),
-                ),
-
-
               ],
             ),
             const SizedBox(height: 24),
@@ -254,102 +197,82 @@ class HomeContentPage extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Trending Venues',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              childAspectRatio: 1,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: const [
-                VenueCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Central Park',
-                  subtitle: '',
-                ),
-                VenueCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Downtown Arena',
-                  subtitle: '',
-                ),
-                VenueCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'City Square',
-                  subtitle: '',
-                ),
-                VenueCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Beachside',
-                  subtitle: '',
-                ),
-              ],
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('venuedata').limit(6).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                final venues = snapshot.data!.docs;
+                return GridView.count(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: venues.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final String name = data['name'] ?? 'Unnamed Venue';
+                    final List<dynamic> imageUrls = data['imageUrls'] ?? [];
+                    final String imageUrl = imageUrls.isNotEmpty ? imageUrls[0] : 'https://placehold.co/300x300';
+                    return GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => VenueDesc(venueData: data))),
+                      child: VenueCard(imageUrl: imageUrl, title: name, subtitle: ''),
+                    );
+                  }).toList(),
+                );
+              },
             ),
             const SizedBox(height: 24),
             const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Featured Products',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
             const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              childAspectRatio: 1,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              children: const [
-                ProductCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Product 1',
-                ),
-                ProductCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Product 2',
-                ),
-                ProductCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Product 3',
-                ),
-                ProductCard(
-                  imageUrl: 'https://placehold.co/300x300',
-                  title: 'Product 4',
-                ),
-              ],
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('productdata').limit(6).snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                final products = snapshot.data!.docs;
+                return GridView.count(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: products.map((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final String title = data['productName'] ?? 'Unnamed Product';
+                    final List<dynamic> imageUrls = data['imageUrls'] ?? [];
+                    final String imageUrl = imageUrls.isNotEmpty ? imageUrls[0] : 'https://placehold.co/300x300';
+                    return GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ProductDesc(productData: data))),
+                      child: ProductCard(imageUrl: imageUrl, title: title),
+                    );
+                  }).toList(),
+                );
+              },
             ),
             const SizedBox(height: 24),
             Center(
               child: TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.clear();
                   AuthService().signout(context: context);
                 },
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                ),
+                child: const Text('Logout', style: TextStyle(color: Colors.white, fontSize: 14)),
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.redAccent.withOpacity(0.8),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
               ),
             ),
@@ -366,64 +289,21 @@ class VenueCard extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const VenueCard({
-    Key? key,
-    required this.imageUrl,
-    required this.title,
-    required this.subtitle,
-  }) : super(key: key);
+  const VenueCard({Key? key, required this.imageUrl, required this.title, required this.subtitle}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> infoWidgets = [
-      Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    ];
-
-    if (subtitle.isNotEmpty) {
-      infoWidgets.add(const SizedBox(height: 4));
-      infoWidgets.add(
-        Text(
-          subtitle,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          )
-        ],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
-            Expanded(
-              flex: 2,
-              child: Image.network(
-                imageUrl,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
+            Expanded(flex: 2, child: Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover)),
             Expanded(
               flex: 1,
               child: Padding(
@@ -431,7 +311,13 @@ class VenueCard extends StatelessWidget {
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: infoWidgets,
+                    children: [
+                      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey), textAlign: TextAlign.center),
+                      ]
+                    ],
                   ),
                 ),
               ),
@@ -447,11 +333,7 @@ class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String title;
 
-  const ProductCard({
-    Key? key,
-    required this.imageUrl,
-    required this.title,
-  }) : super(key: key);
+  const ProductCard({Key? key, required this.imageUrl, required this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -459,39 +341,19 @@ class ProductCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          )
-        ],
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Column(
           children: [
-            Expanded(
-              flex: 2,
-              child: Image.network(
-                imageUrl,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
+            Expanded(flex: 2, child: Image.network(imageUrl, width: double.infinity, fit: BoxFit.cover)),
             Expanded(
               flex: 1,
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
               ),
             ),
