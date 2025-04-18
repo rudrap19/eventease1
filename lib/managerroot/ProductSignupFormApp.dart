@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../managerroot/ManagerPageroot.dart'; // Adjust import if needed
 
 void main() {
   runApp(const ProductSignUpFormApp());
@@ -83,23 +84,10 @@ class _ProductSignUpFormState extends State<ProductSignUpForm> {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Product submitted successfully!")),
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const ManagerPageroot()),
     );
-
-    _productNameController.clear();
-    _descriptionController.clear();
-    _quantityController.clear();
-    _priceController.clear();
-    _sellerNameController.clear();
-    _registeredAddressController.clear();
-    _deliveryAddressController.clear();
-    _gstController.clear();
-
-    setState(() {
-      _selectedImages.clear();
-      _uploadedImageUrls.clear();
-    });
   }
 
   @override

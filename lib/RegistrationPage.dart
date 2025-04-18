@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,9 +13,15 @@ class _RegistrationPageState extends State<RegistrationPage> {
   DateTime? selectedDate;
   String selectedTiming = 'Morning (8-3)';
   List<String> selectedServices = [];
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController otpController = TextEditingController();
+
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController otpController = TextEditingController();
+
   bool isEmailVerified = false;
+  bool otpSent = false;
+  bool otpVerified = false;
+  String? _verificationId;
+  Timer? _emailCheckTimer;
 
   final List<String> timings = [
     'Morning (8-3)',
@@ -32,51 +39,138 @@ class _RegistrationPageState extends State<RegistrationPage> {
   void initState() {
     super.initState();
     _checkEmailVerification();
+    _startEmailVerificationTimer();
   }
 
-  void _checkEmailVerification() {
+  void _startEmailVerificationTimer() {
+    _emailCheckTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.reload();
+        if (user.emailVerified) {
+          setState(() => isEmailVerified = true);
+          timer.cancel();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Email verified!')),
+          );
+        }
+      }
+    });
+  }
+
+  Future<void> _checkEmailVerification() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      await user.reload();
       setState(() {
         isEmailVerified = user.emailVerified;
       });
     }
   }
 
-  void _sendOtp() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('OTP sent to phone number')),
+  Future<void> _resendEmailVerification() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Verification email sent.')),
+      );
+    }
+  }
+
+  Future<void> _sendOtp() async {
+    final phone = phoneController.text.trim();
+    if (phone.isEmpty || phone.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a valid phone number')),
+      );
+      return;
+    }
+
+    final fullPhone = '+91$phone'; // Change country code if needed
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: fullPhone,
+      timeout: const Duration(seconds: 60),
+      verificationCompleted: (credential) async {
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        setState(() => otpVerified = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Phone auto-verified')),
+        );
+      },
+      verificationFailed: (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OTP Failed: ${e.message}')),
+        );
+      },
+      codeSent: (verificationId, _) {
+        setState(() {
+          _verificationId = verificationId;
+          otpSent = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP sent')),
+        );
+      },
+      codeAutoRetrievalTimeout: (verificationId) {
+        _verificationId = verificationId;
+      },
     );
+  }
+
+  Future<void> _verifyOtp() async {
+    final code = otpController.text.trim();
+    if (_verificationId == null || code.isEmpty) return;
+
+    try {
+      final credential = PhoneAuthProvider.credential(
+        verificationId: _verificationId!,
+        smsCode: code,
+      );
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      setState(() => otpVerified = true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('OTP Verified')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invalid OTP: $e')),
+      );
+    }
   }
 
   void _submitBooking() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Booking submitted')),
+      const SnackBar(content: Text('Booking Submitted!')),
     );
   }
 
   void _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
+    if (picked != null) setState(() => selectedDate = picked);
   }
 
   void _toggleService(String service) {
     setState(() {
-      if (selectedServices.contains(service)) {
-        selectedServices.remove(service);
-      } else {
-        selectedServices.add(service);
-      }
+      selectedServices.contains(service)
+          ? selectedServices.remove(service)
+          : selectedServices.add(service);
     });
+  }
+
+  @override
+  void dispose() {
+    _emailCheckTimer?.cancel();
+    phoneController.dispose();
+    otpController.dispose();
+    super.dispose();
   }
 
   @override
@@ -90,7 +184,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
       ),
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -99,22 +192,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
             ),
           ),
-          // Semi-transparent overlay (optional)
-          Container(
-            color: Colors.black.withOpacity(0.4),
-          ),
-          // Form content
+          Container(color: Colors.black.withOpacity(0.4)),
           SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Select Date',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
+                  _sectionTitle("Select Date"),
                   Row(
                     children: [
                       Expanded(
@@ -132,19 +217,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Select Timing',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+
+                  _sectionTitle("Select Timing"),
                   DropdownButton<String>(
                     value: selectedTiming,
                     dropdownColor: Colors.white,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedTiming = newValue!;
-                      });
-                    },
-                    items: timings.map((String value) {
+                    onChanged: (newValue) => setState(() => selectedTiming = newValue!),
+                    items: timings.map((value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(value),
@@ -152,22 +231,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Additional Services',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  ...services.map((service) {
-                    return CheckboxListTile(
-                      title: Text(service, style: const TextStyle(color: Colors.white)),
-                      value: selectedServices.contains(service),
-                      onChanged: (_) => _toggleService(service),
-                    );
-                  }).toList(),
+
+                  _sectionTitle("Additional Services"),
+                  ...services.map((service) => CheckboxListTile(
+                    title: Text(service, style: const TextStyle(color: Colors.white)),
+                    value: selectedServices.contains(service),
+                    onChanged: (_) => _toggleService(service),
+                  )),
+
                   const SizedBox(height: 20),
-                  const Text(
-                    'Phone Number',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+                  _sectionTitle("Phone Number"),
                   Row(
                     children: [
                       Expanded(
@@ -175,50 +248,48 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           controller: phoneController,
                           keyboardType: TextInputType.phone,
                           style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Enter phone number',
-                            hintStyle: TextStyle(color: Colors.white54),
-                            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                            focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                          ),
+                          decoration: _underlineInput("Enter phone number"),
                         ),
                       ),
                       const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: _sendOtp,
-                        child: const Text('Get OTP'),
-                      ),
+                      ElevatedButton(onPressed: _sendOtp, child: const Text('Send OTP')),
                     ],
                   ),
+
+                  if (otpSent) ...[
+                    const SizedBox(height: 20),
+                    _sectionTitle("Verify OTP"),
+                    TextField(
+                      controller: otpController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: _underlineInput("Enter OTP"),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(onPressed: _verifyOtp, child: const Text('Verify OTP')),
+                  ],
+
                   const SizedBox(height: 20),
-                  const Text(
-                    'Verify OTP',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  _sectionTitle("Email Verification"),
+                  Row(
+                    children: [
+                      Text(
+                        'Verified: ${isEmailVerified ? "Yes" : "No"}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isEmailVerified ? Colors.green : Colors.red,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      if (!isEmailVerified)
+                        ElevatedButton(
+                          onPressed: _resendEmailVerification,
+                          child: const Text("Resend Email"),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orangeAccent),
+                        ),
+                    ],
                   ),
-                  TextField(
-                    controller: otpController,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      hintText: 'Enter OTP',
-                      hintStyle: TextStyle(color: Colors.white54),
-                      enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'Email Verification Status',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Verified: ${isEmailVerified ? "Yes" : "No"}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isEmailVerified ? Colors.green : Colors.red,
-                    ),
-                  ),
+
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
@@ -230,10 +301,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: const Text(
-                        'Book',
-                        style: TextStyle(fontSize: 18),
-                      ),
+                      child: const Text('Book', style: TextStyle(fontSize: 18)),
                     ),
                   ),
                 ],
@@ -242,6 +310,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Text _sectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+    );
+  }
+
+  InputDecoration _underlineInput(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Colors.white54),
+      enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
+      focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.white)),
     );
   }
 }

@@ -1,77 +1,127 @@
-import 'package:eventease1/managerroot/ManagerSignUpFormApp.dart';
-import 'package:eventease1/managerroot/ProductSignupFormApp.dart';
-import 'package:eventease1/managerroot/ServiceSignUpFormApp.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../managerroot/ManagerPageroot.dart'; // Adjust the path if needed
 
-import 'package:flutter/material.dart';
-import '../user_auth_page.dart';
-import '../manager_auth_page.dart';
-import 'VenueSignUpFormApp.dart';
-
-
-class ManagerSignupSelection extends StatefulWidget {
-  const ManagerSignupSelection({Key? key}) : super(key: key);
-
-  @override
-  _ManagerSignupSelectionState createState() => _ManagerSignupSelectionState();
+void main() {
+  runApp(const ManagerSignUpFormApp());
 }
 
-class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
-  String? _selectedOption;
+class ManagerSignUpFormApp extends StatelessWidget {
+  const ManagerSignUpFormApp({super.key});
 
-  void _managerSignupSelection() {
-    if (_selectedOption == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select an option")),
-      );
-      return;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Event Manager Sign Up Form',
+      home: ManagerSignUpForm(),
+    );
+  }
+}
+
+class ManagerSignUpForm extends StatefulWidget {
+  const ManagerSignUpForm({super.key});
+
+  @override
+  State<ManagerSignUpForm> createState() => _ManagerSignUpFormState();
+}
+
+class _ManagerSignUpFormState extends State<ManagerSignUpForm> {
+  final ImagePicker _picker = ImagePicker();
+  List<File> _selectedImages = [];
+  List<String> _uploadedImageUrls = [];
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _experienceController = TextEditingController();
+  final TextEditingController _typesController = TextEditingController();
+  final TextEditingController _pricingController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _servicesController = TextEditingController();
+
+  Future<void> _pickImages() async {
+    final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+    if (pickedFiles != null) {
+      setState(() {
+        _selectedImages = pickedFiles.map((file) => File(file.path)).toList();
+      });
+    }
+  }
+
+  Future<void> _uploadImages() async {
+    _uploadedImageUrls.clear();
+    for (var image in _selectedImages) {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('manager_uploads')
+          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+      final uploadTask = storageRef.putFile(image);
+      final snapshot = await uploadTask;
+      final imageUrl = await snapshot.ref.getDownloadURL();
+      _uploadedImageUrls.add(imageUrl);
+    }
+  }
+
+  Future<void> _storeManagerData() async {
+    if (_selectedImages.isNotEmpty) {
+      await _uploadImages();
     }
 
-    if (_selectedOption == "Manager") {
-      Navigator.push(
+    try {
+      await FirebaseFirestore.instance.collection('managerdata').add({
+        'name': _nameController.text.trim(),
+        'experience': _experienceController.text.trim(),
+        'typesOfEvent': _typesController.text.trim(),
+        'averagePricing': _pricingController.text.trim(),
+        'location': _locationController.text.trim(),
+        'servicesProvided': _servicesController.text.trim(),
+        'imageUrls': _uploadedImageUrls,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Clear form
+      _nameController.clear();
+      _experienceController.clear();
+      _typesController.clear();
+      _pricingController.clear();
+      _locationController.clear();
+      _servicesController.clear();
+      setState(() {
+        _selectedImages.clear();
+        _uploadedImageUrls.clear();
+      });
+
+      // ✅ Redirect to manager root
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => ManagerSignUpFormApp(),
-        ),
+        MaterialPageRoute(builder: (context) => const ManagerPageroot()),
       );
-    } else if (_selectedOption == "Venue") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => VenueSignUpFormApp(),
-        ),
-      );
-    } else if (_selectedOption == "Services") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ServiceSignUpFormApp(),
-        ),
-      );
-    } else if (_selectedOption == "Products") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProductSignUpFormApp()
-        ),
+    } catch (e) {
+      print("Error storing manager data: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
       );
     }
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _experienceController.dispose();
+    _typesController.dispose();
+    _pricingController.dispose();
+    _locationController.dispose();
+    _servicesController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Set the AppBar background to transparent.
-      appBar: AppBar(
-        title: const Text("Select Signup Option"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      // Extend the body behind the AppBar.
-      extendBodyBehindAppBar: true,
+      appBar: AppBar(title: const Text("Manager Sign Up Form")),
       body: Stack(
         children: [
-          // Background image container.
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -80,51 +130,84 @@ class _ManagerSignupSelectionState extends State<ManagerSignupSelection> {
               ),
             ),
           ),
-          // Overlay the content on top of the background.
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  RadioListTile<String>(
-                    title: const Text("Venue"),
-                    value: "Venue",
-                    groupValue: _selectedOption,
-                    onChanged: (value) {
-                      setState(() => _selectedOption = value);
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  "Upload Manager Images",
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                _selectedImages.isNotEmpty
+                    ? SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _selectedImages.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.file(
+                          _selectedImages[index],
+                          width: 150,
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
+                      );
                     },
                   ),
-                  RadioListTile<String>(
-                    title: const Text("Manager"),
-                    value: "Manager",
-                    groupValue: _selectedOption,
-                    onChanged: (value) {
-                      setState(() => _selectedOption = value);
-                    },
-                  ),
-                  RadioListTile<String>(
-                    title: const Text("Services"),
-                    value: "Services",
-                    groupValue: _selectedOption,
-                    onChanged: (value) {
-                      setState(() => _selectedOption = value);
-                    },
-                  ),
-                  RadioListTile<String>(
-                    title: const Text("Products"),
-                    value: "Products",
-                    groupValue: _selectedOption,
-                    onChanged: (value) {
-                      setState(() => _selectedOption = value);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _managerSignupSelection,
-                    child: const Text("Confirm"),
-                  ),
-                ],
-              ),
+                )
+                    : const Placeholder(fallbackHeight: 200),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: _pickImages,
+                  child: const Text("Pick Images"),
+                ),
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(labelText: "Name"),
+                ),
+                const SizedBox(height: 8),
+
+                TextField(
+                  controller: _experienceController,
+                  decoration: const InputDecoration(labelText: "Experience"),
+                ),
+                const SizedBox(height: 8),
+
+                TextField(
+                  controller: _typesController,
+                  decoration: const InputDecoration(labelText: "Types of Events"),
+                ),
+                const SizedBox(height: 8),
+
+                TextField(
+                  controller: _pricingController,
+                  decoration: const InputDecoration(labelText: "Average Pricing (₹)"),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 8),
+
+                TextField(
+                  controller: _locationController,
+                  decoration: const InputDecoration(labelText: "Location"),
+                ),
+                const SizedBox(height: 8),
+
+                TextField(
+                  controller: _servicesController,
+                  decoration: const InputDecoration(labelText: "Services Provided"),
+                ),
+                const SizedBox(height: 16),
+
+                ElevatedButton(
+                  onPressed: _storeManagerData,
+                  child: const Text("Submit Manager Data"),
+                ),
+              ],
             ),
           ),
         ],
