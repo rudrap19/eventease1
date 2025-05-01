@@ -54,7 +54,7 @@ class _LoginChoicePageState extends State<LoginChoicePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/logo.png', width: 150, height: 150),
+                  Image.asset('assets/logo.png', width: 200, height: 200),
                   const SizedBox(height: 50),
 
                   // User Auth
@@ -89,7 +89,7 @@ class _LoginChoicePageState extends State<LoginChoicePage> {
 
                   const Text(
                     "Root Login",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                    style: TextStyle(color: const Color(0xFFFFFFFF), fontSize: 18),
                   ),
                   const SizedBox(height: 10),
 

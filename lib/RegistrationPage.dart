@@ -201,9 +201,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   _sectionTitle('Email Verification'),
                   if (!isEmailVerified)
                     TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.white,    // white button background
+                      ),
                       onPressed: _resendEmailVerification,
                       child: const Text('Resend verification email',
-                          style: TextStyle(color: Colors.white)),
+                          style: TextStyle(color: Colors.black)),
                     )
                   else
                     const Text('Email verified',
@@ -240,7 +243,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
-                      onPressed: isEmailVerified && otpVerified &&
+                      onPressed: isEmailVerified &&
                           selectedDate != null
                           ? () {
                         // Here you can use `selectedServicesString`

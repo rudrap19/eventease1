@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../RegistrationPage.dart';
+import 'ManagerBookingForm.dart';
 
 class ManagerDesc extends StatelessWidget {
   final Map<String, dynamic> managerData;
@@ -83,9 +84,9 @@ class ManagerDesc extends StatelessWidget {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      //Navigator.push(
-                       // context,
-                       // MaterialPageRoute(builder: (context) => const RegistrationPage()),);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ManagerBookingForm()),);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
