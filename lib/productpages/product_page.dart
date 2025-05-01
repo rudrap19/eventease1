@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'ProductDesc.dart'; // Make sure this file exists and is implemented
-import '../RegistrationPage.dart';
+import 'ProductDesc.dart';
 
 class EventProductStorePage extends StatelessWidget {
   const EventProductStorePage({Key? key}) : super(key: key);
@@ -32,7 +31,7 @@ class EventProductStorePage extends StatelessWidget {
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.5)),
+
           SingleChildScrollView(
             padding: const EdgeInsets.only(
               top: kToolbarHeight + 24,
@@ -58,13 +57,11 @@ class EventProductStorePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-
                 const Text(
                   'Featured Products',
                   style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 16.0),
-
                 StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance.collection('productdata').snapshots(),
                   builder: (context, snapshot) {
@@ -100,34 +97,13 @@ class EventProductStorePage extends StatelessWidget {
                           child: ProductCard(
                             imageUrl: imageUrl,
                             name: name,
-                            rating: 4.5, // Replace with real rating if available
+                            rating: 4.5,
                             price: price,
                           ),
                         );
                       }).toList(),
                     );
                   },
-                ),
-
-                const SizedBox(height: 24.0),
-
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    child: const Text("Book Venue", style: TextStyle(fontSize: 16)),
-                  ),
                 ),
               ],
             ),
