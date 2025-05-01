@@ -83,10 +83,9 @@ class ManagerDesc extends StatelessWidget {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
-                      );
+                      //Navigator.push(
+                       // context,
+                       // MaterialPageRoute(builder: (context) => const RegistrationPage()),);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

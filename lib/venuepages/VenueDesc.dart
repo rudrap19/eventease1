@@ -1,3 +1,4 @@
+// VenueDesc.dart
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../RegistrationPage.dart';
@@ -9,24 +10,18 @@ class VenueDesc extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String name = venueData['name'] ?? 'Unnamed Venue';
+    // Extract and convert data
+    final String name = venueData['name']?.toString() ?? 'Unnamed Venue';
     final String capacity = venueData['capacity']?.toString() ?? 'N/A';
-    final String venueType = venueData['venueType'] ?? 'N/A';
-    final String timings = venueData['timings'] ?? 'N/A';
-    final String contact = venueData['contact'] ?? 'N/A';
+    final String venueType = venueData['venueType']?.toString() ?? 'N/A';
+    final String timings = venueData['timings']?.toString() ?? 'N/A';
+    final String contact = venueData['contact']?.toString() ?? 'N/A';
 
-    // Updated location string using individual fields
-    final String location = [
-      venueData['plotNo'],
-      venueData['area'],
-      venueData['town'],
-      venueData['city'],
-    ].where((e) => e != null && e.toString().isNotEmpty).join(', ');
-
-    final List<dynamic> imageUrlsDynamic = venueData['imageUrls'] ?? [];
+    final List<dynamic> imageUrlsDynamic = venueData['images'] ?? [];
     final List<String> imageUrls = imageUrlsDynamic.map((e) => e.toString()).toList();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(name),
         backgroundColor: Colors.transparent,
@@ -34,19 +29,24 @@ class VenueDesc extends StatelessWidget {
       ),
       body: Stack(
         children: [
+          // Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/bg.png"),
+                image: AssetImage('assets/bg.png'),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          Container(color: Colors.black.withOpacity(0.3)),
+          // Dark overlay
+          Container(color: Colors.black.withOpacity(0.6)),
+
+          // Content
           SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
+                // Image carousel or placeholder
                 if (imageUrls.isNotEmpty)
                   CarouselSlider(
                     options: CarouselOptions(
@@ -72,45 +72,43 @@ class VenueDesc extends StatelessWidget {
                   )
                 else
                   Container(
-                    height: 250,
-                    color: Colors.grey[300],
-                    child: const Center(child: Text("No images available")),
+                    height: 250.0,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.photo, size: 48, color: Colors.white54),
+                    ),
                   ),
-                const SizedBox(height: 16),
-                Text(
-                  name,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow(Icons.location_on, location),
-                _buildInfoRow(Icons.people, "Capacity: $capacity"),
-                _buildInfoRow(Icons.category, "Type: $venueType"),
-                _buildInfoRow(Icons.access_time, "Timings: $timings"),
-                _buildInfoRow(Icons.phone, "Contact: $contact"),
-                if (venueData['description'] != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    venueData['description'],
-                    style: const TextStyle(fontSize: 16, color: Colors.white70),
-                  ),
-                ],
+
                 const SizedBox(height: 24),
+
+                // Info rows
+                _buildInfoRow(Icons.people, 'Capacity: $capacity'),
+                _buildInfoRow(Icons.category, 'Type: $venueType'),
+                _buildInfoRow(Icons.access_time, 'Timings: $timings'),
+                _buildInfoRow(Icons.phone, 'Contact: $contact'),
+
+                const SizedBox(height: 32),
+
+                // Book button
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RegistrationPage()),
+                        MaterialPageRoute(
+                          builder: (context) => RegistrationPage(bookingName: name),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
-                    child: const Text("Book Venue", style: TextStyle(fontSize: 16)),
+                    child: const Text('Book Now', style: TextStyle(fontSize: 18)),
                   ),
                 ),
               ],
@@ -123,16 +121,13 @@ class VenueDesc extends StatelessWidget {
 
   Widget _buildInfoRow(IconData icon, String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.white),
-          const SizedBox(width: 6),
+          Icon(icon, size: 24, color: Colors.white),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
+            child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 16)),
           ),
         ],
       ),
