@@ -1,6 +1,8 @@
+import 'package:eventease1/servicepages/ServiceBookingForm.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../RegistrationPage.dart';
+
+
 
 class ServiceDesc extends StatelessWidget {
   final Map<String, dynamic> serviceData;
@@ -95,9 +97,9 @@ class ServiceDesc extends StatelessWidget {
                 Center(
                   child: ElevatedButton(
                     onPressed: () {
-                      //Navigator.push(
-                        //context,
-                        //MaterialPageRoute(builder: (context) => const RegistrationPage()),);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ServiceBookingForm()),);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

@@ -101,6 +101,8 @@ class VenuePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Venue"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Stack(
         children: [

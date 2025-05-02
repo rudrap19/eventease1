@@ -17,7 +17,7 @@ class VenueDesc extends StatelessWidget {
     final String timings = venueData['timings']?.toString() ?? 'N/A';
     final String contact = venueData['contact']?.toString() ?? 'N/A';
 
-    final List<dynamic> imageUrlsDynamic = venueData['images'] ?? [];
+    final List<dynamic> imageUrlsDynamic = venueData['imageUrls'] ?? [];
     final List<String> imageUrls = imageUrlsDynamic.map((e) => e.toString()).toList();
 
     return Scaffold(
@@ -39,7 +39,7 @@ class VenueDesc extends StatelessWidget {
             ),
           ),
           // Dark overlay
-          Container(color: Colors.black.withOpacity(0.6)),
+          Container(color: Colors.black.withOpacity(0)),
 
           // Content
           SafeArea(
